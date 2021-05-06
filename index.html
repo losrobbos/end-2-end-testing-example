@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cypress E2E Testing</title>
+</head>
+<style>
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    height: 100vh;
+    display: grid;
+    place-items: center;
+  }
+
+  label {
+    display: block;
+  }
+
+  .status {
+    font-weight: bold;
+  }
+
+  .success {
+    background-color: greenyellow;
+  }
+
+  .error {
+    background-color: indianred;
+    color: white;
+  }
+
+</style>
+
+<script>
+
+  // update status message & style
+  const setStatus = (status, displayText) => {
+    let elStatus = document.querySelector(".status")
+    let [clsStatus, clsToDelete] = [...elStatus.classList]
+    elStatus.classList.remove(clsToDelete)
+    elStatus.classList.add(status)
+    elStatus.innerHTML = displayText || status.toUpperCase()
+  }
+
+  const loginApi = () => {
+
+    setStatus("error", "Logging in...")
+
+    const email = document.querySelector("#email").value
+    const password = document.querySelector("#password").value
+
+    fetch('http://localhost:5000/login', {
+      method: "POST",
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({email,password})
+    })
+    .then(res => { 
+      setStatus("error", "Logging in...")
+      return res.json()
+    })
+    .then(data => {
+      // display error
+      if(data.error) {
+        setStatus("error", data.error)
+      }
+      else {
+        console.log("Received login response!")
+        setStatus("success", `User logged in successfully!`)
+        // setStatus("success", `User with ID ${data._id} logged in successfully!`)
+      }
+    })
+    .catch(err => {
+      setStatus("error", err.message || "API not reachable... :-(")
+    }) 
+  }
+
+</script>
+<body>
+
+  <div class="container">
+    <h2>Login Form</h2>
+    <div><label>Email:</label><input id="email" type="email" name="email" /></div>
+    <div><label>Password:</label><input id="password" type="password" name="password" /></div>
+    <button onclick="loginApi();">Login</button>
+    <div class="status"></div>
+  </div>
+
+</body>
+</html>
